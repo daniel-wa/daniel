@@ -12,3 +12,5 @@ Do an `install packages()` to get
 * `RColorBrewer`
 * `makeFlow`
 * `seqinr`
+* `qpcR`
+* `heatmap3`

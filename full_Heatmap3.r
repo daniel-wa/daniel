@@ -60,7 +60,9 @@ mymain <- function() {
 
 #   Filter_name() maps the taxonomic information to the nameset.
 #   Since NCBI has more unique mappings, we use NCBI
-    taxnameset <- filter_name(nameset, provider = getOption("taxadb_default_provider", "ncbi"))
+
+    taxnameset <- filter_name(nameset, provider = getOption("taxadb_default_provider", "ncbi"),
+                              ignore_case = T)
 #   Ask which taxonomic rank he would like to select (and checked for typos)
     taxrank <- ""
     while (taxrank != "kingdom" && taxrank != "phylum" &&
@@ -71,13 +73,17 @@ mymain <- function() {
 
 #   Remove all columns from taxanameset except input (species name), Sort (shows duplicates)
 #   and chosen taxrank
-    taxnameset <- taxnameset[, c("sort", "input", taxrank)]
+#   We no longer remove duplicates, since there are often different bacteria with
+#   the same name.
+
+    taxnameset <- taxnameset[, c("scientificName", taxrank)]
 
 #   Remove duplicates by using sort as primary key
-    taxnameset <- taxnameset[!duplicated(taxnameset$sort), ]
+    if (F)
+        taxnameset <- taxnameset[!duplicated(taxnameset$sort), ]
 
 #   delete "sort" column
-    nametaxa <- taxnameset[, c("input", taxrank)]
+    nametaxa <- taxnameset[, c("scientificName", taxrank)]
     rm(taxnameset)
 
 #   sort the groups from most seen group to less seen group
@@ -207,7 +213,7 @@ mymain <- function() {
 #   Create a data.frame with all groups and their unique input names
     for (i in 1:nrow(groupset)) {
         inputgroup <- subset(nametaxa, nametaxa[1:nrow(nametaxa), 2] == groupset[i, ])
-        inputgroup <- inputgroup[ ,c("input")]
+        inputgroup <- inputgroup[ ,c("scientificName")]
         names(inputgroup)[names(inputgroup) == "input"] <- groupset[i,]
         inputgroup <- inputgroup[!duplicated(inputgroup), ]
         if (i == 1) {
